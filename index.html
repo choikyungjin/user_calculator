@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <title>HCI CALCULATOR</title>
+    <meta name="viewport" content="width=device-width">
+    <script src="math.js" type='text/javascript'></script>
+    <script type="text/javascript">
+          var history = [];
+          var his_index = 0;
+          var parser = math.parser();
+          var isChanged = false;
+
+
+          // reset
+          function reset(){
+            
+            document.getElementById('input').value = "0";
+          }
+          // append history calculation text
+          function append(ad){
+            var history_text = document.getElementById('histories');
+            var ap = (ad) + "\r\n";
+            history_text.value += ap;
+          }
+
+          //// basic operation //
+          function button_click(e){
+            var key = e;
+            value = document.getElementById('input').value;
+
+            if(value == 0 || value == "INPUT"){
+                document.getElementById('input').value = '';
+                value = "";
+              }
+                 // calculate
+            if(key == "EV"){
+              try{
+                  value = value.replace(/×/gi, '*');
+                  //alert(value);
+                  var tmp = parser.eval(value);
+                  tmp = tmp.toString();
+                  //alert(tmp);
+                  var isFunc = tmp.split(" ");
+
+                  if(isFunc[0] == "function")
+                    tmp = "function>> " + value;
+
+                  document.getElementById('result').value = tmp;
+                  var add = (value + ' = ' + tmp).toString();
+                  append(add);
+                  reset();
+              }catch (execption){
+                document.getElementById('result').value = "ERROR";
+                reset();
+              }
+          }
+          // clear
+          else if(key == "CLEAR"){
+            document.getElementById('result').value = "0";
+            reset();
+          }
+          // delete
+          else if(key == "backspace"){
+            var current = value;
+            if(current.length == 1){
+              reset();
+              return;
+            }
+            var prev = current.substring(0,(current.length-1));
+            document.getElementById('input').value = prev;
+          }
+          // input text
+          else{
+            value += key;
+            document.getElementById('input').value = value;
+          }
+      }
+      // operator
+      function select_operator(op){
+          var addition = document.getElementById(op+"_atn");
+          if (addition.style.visibility == "visible") {
+            addition.style.visibility = "hidden";
+          }
+          else {
+            var button = document.getElementById(op);
+            var top = get_pos_top(button);
+            var left = get_pos_left(button);
+            //alert(top + " " +left)
+            addition.style.position = "absolute";
+            addition.style.top = top;
+            addition.style.left = left;
+            addition.style.visibility = "visible";
+          }
+
+      }
+
+      function show_history(){
+        var text_box = document.getElementById("histories");
+        if (text_box.style.visibility == "visible") {
+          text_box.style.visibility = "hidden";
+        }
+        else {
+          var position = document.getElementById("textbox");
+          var top = get_pos_top(position);
+          var left = get_pos_left(position);
+          text_box.style.top = top;
+          text_box.style.left = left;
+          text_box.style.visibility = "visible";
+        }
+      }
+
+      // find left-position
+      function get_pos_left(pos){
+          if(pos.offsetParent == document.body)
+            return pos.offsetLeft;
+          else
+            return pos.offsetLeft + get_pos_left(pos.offsetParent);
+      }
+      // find top-position
+      function get_pos_top(pos){
+        if(pos.offsetParent == document.body)
+          return pos.offsetTop;
+        else
+          return pos.offsetTop + get_pos_top(pos.offsetParent);
+      }
+
+      // 그래프 그리기
+
+    </script>
+
+    <style type="text/css">
+      /* 전체 table */
+      #calculator{
+        background: black;
+        border-radius: 5px;
+        border-spacing: 10px;
+      }
+      /* 제목 */
+      #top{
+        font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+        font-size: 30px;
+        padding: 20px 10px;
+        text-align: center;
+        text-rendering: optimizeLegibility;
+        color: #e0dfdc;
+        letter-spacing: .1em;
+      }
+      /* 낙인 */
+      #bottom{
+        font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+        text-align: right;
+        font-size: 5px;
+        color: #e0dfdc;
+      }
+      /* 커서 올렸을 때 */
+      button.calc:hover{
+        background: white;
+        color: black;
+      }
+      /* 버튼 눌렸을 때 */
+      button:active {
+            background-color: #a1a1a1;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+      /* 숫자, 연산자 버튼 적용 */
+      button.NUMBER, button.operator{
+        border: 2px solid #555555;
+        border-radius: 5px;
+        background: black;
+        color: white;
+        width: 70px;
+        height: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serif;
+        font-size: 25px;
+        font-weight: bold;
+      }
+      /* clear backspace evaluate */
+      button.RED{
+        border: 2px solid rgb(255,167,167);
+        border-radius: 5px;
+        width: 110px;
+        height: 40px;
+        font-family: "Trebuchet MS", Helvetica, sans-serif;
+        font-size: 17px;
+        font-weight: bold;
+        background: rgb(255,167,167);
+      }
+      /* operator */
+      button.operator{
+        width: 110px;
+        height: 40px;
+        font-size: 17px;
+      }
+      /* HISTORY button */
+      button.HISTORY{
+        align: right;
+        border: 0px solid black;
+        border-radius: 5px;
+        width: 110px;
+        height: 40px;
+        font-family: "Trebuchet MS", Helvetica, sans-serif;
+        font-size: 17px;
+        font-weight: bold;
+        background: rgb(255,211,176);
+      }
+      /* input, result */
+      td > #input, td > #result{
+				background-color: white;
+				border-radius: 5px;
+				height: 40px;
+        width: 575px;
+				font-size: 30px;
+				color: rgb(140,140,140);
+        text-align: right;
+			}
+      #result{ margin: 10px 0px 0px 10px; }
+      #input{ margin: 0px 0px 10px 10px; }
+      /* 추가 버튼 */
+      .additional{
+        visibility: hidden;
+        position: absolute;
+        z-index: 2;
+      }
+      /* 추가 버튼 디자인 */
+      button.op{
+        border: 1.5px solid red;
+        border-radius: 5px;
+        width: 90px;
+        height: 40px;
+        font-size: 20px;
+        background: black;
+        color: white;
+      }
+      button.op:hover{
+        background: white;
+        color: black;
+      }
+      button.graph{
+        width: 90px;
+        text-align: center;
+      }
+      /* textarea */
+      #histories{
+				visibility: hidden;
+				position: absolute;
+  			width: 340px;
+  			height: 120px;
+				z-index: 3;
+				text-align: left;
+        resize: none;
+        border-radius: 10px;
+        border: 1px solid white;
+			}
+      /* how2use */
+      #how2use{
+        visibility: hidden;
+				position: absolute;
+  			width: 200px;
+  			height: 100px;
+				z-index: 3;
+				text-align: left;
+        resize: none;
+        border-radius: 10px;
+        border: 1px solid white;
+      }
+      /* canvas */
+      #canvas{
+        margin: 0px 15px 15px 15px;
+        background: #FFFAF0;
+        border: thin inset black;
+        border-radius: 10px;
+        display: inline;
+      }
+      #controls{
+        height: 30px;
+      }
+      /* canvas equation */
+      #eqation_text{
+        position: absolute;
+        z-index: 3;
+        border: thin inset white;
+        border-radius: 10px;
+        display: inline;
+      }
+      /* scale text */
+      #scaleOutput{
+        font-family: "Trebuchet MS", Helvetica, sans-serif;
+        color: white;
+        margin: 0px 10px 0px 20px;
+        vertical-align: top;
+        display: inline;
+      }
+      /* scale bar */
+      #scaleSlider{
+        vertical-align: 0px;
+        width: 520px;
+      }
+      #canvasdiv{
+        overflow-x: scroll;
+        overflow-y: hidden;
+        width: 570px;
+        height: 40px;
+      }
+      /* eqation text canvas */
+      #equation_text{
+        width: 1000px;
+        height: 60px;
+        background: white;
+        border: thin inset black;
+        border-radius: 5px;
+        text-align: left;
+      }
+      /* scrollbar */
+      ::-webkit-scrollbar {
+        width: 1em;
+        height: 0.7em
+      }
+      /* scrollbar-Track */
+      ::-webkit-scrollbar-track {
+          -webkit-box-shadow: inset 0 0 6px white;
+          -webkit-border-radius: 10px;
+          border-radius: 10px;
+      }
+      /* scrollbar-Handle */
+      ::-webkit-scrollbar-thumb {
+          -webkit-border-radius: 10px;
+          border-radius: 10px;
+          border: 2px solid black;
+          background:	white;
+      }
+      ::-webkit-scrollbar-thumb:window-inactive {
+      	background: white;
+      }
+
+      input[type="range"]{
+        -webkit-appearance:none;
+        width: 160px;
+        background-size:150px 10px;
+        background-position:center;
+        background-repeat:no-repeat;
+        overflow:hidden;
+        outline: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb{
+        -webkit-appearance:none;
+        width:20px;
+        height:20px;
+        background:#F26B5E;
+        position:relative;
+        z-index:3;
+        box-shadow:0 0 0px 0 rgba(0,0,0,0.3);
+      }
+
+      input[type="range"]::-webkit-slider-thumb:after{
+        content:" ";
+        width:200px;
+        height:10px;
+        position:absolute;
+        z-index:1;
+        right:20px;
+        background: #ff5b32;
+        background: linear-gradient(to right, #f088fc 1%, #AC6CFF 70%);
+      }
+    </style>
+  </head>
+  <body align="center">
+    <center>
+      <table id="calculator">
+        <tr id="top">
+          <td colspan="2">CALCULATOR</td>
+        </tr>
+        <tr>
+          <td colspan='2'><div id='controls'>
+            <ouput id='scaleOutput'>1.00</ouput>
+            <input id='scaleSlider' type="range" min='1.0' max='5.0' step='0.02' value='1.0' class='slider'>
+          </div></td>
+        </tr>
+        <tr align='center'>
+          <!-- 그래프 식 -->
+          <td colspan='2'>
+            <div id="canvasdiv">
+              <canvas id='equation_text' width='550' height='29'>
+                canvas not supported
+              </canvas>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <!-- 그래프 -->
+          <td colspan="2">
+            <canvas id='canvas' width='570' height='300'>
+              Canvas not supported
+            </canvas>
+          </td>
+        </tr>
+        <tr>
+          <!-- 수식 -->
+          <td colspan="2">
+            <input type="text" id="result" value="RESULT"></input>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <input type="text" id="input" value="INPUT"></input>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-left: 10px">
+            <!--숫자버튼 -->
+            <table id="operands">
+              <tr>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='7'>7</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='8'>8</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='9'>9</button></td>
+              </tr>
+              <tr>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='4'>4</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='5'>5</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='6'>6</button></td>
+              </tr>
+              <tr>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='1'>1</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='2'>2</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='3'>3</button></td>
+              </tr>
+              <tr>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='0'>0</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value='.'>.</button></td>
+                <td><button class="calc NUMBER" onclick="button_click(this.value);" value=','>,</button></td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <!--수식버튼 -->
+            <table id="operator">
+              <tr>
+                <td id="textbox">
+                  <div style="font-size: 20px">NULL</div>
+                  <div>
+                    <textarea name="text" id="histories"></textarea>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc HISTORY" id="op10" onclick="select_operator(this.value)" value="op10">GRAPH</button>
+                  <div class="additional" id="op10_atn">
+                    <button class="op graph" onclick="graph_click(this.value);" value="how">HOW</button>
+                    <div id='textbox2'>
+                      <textarea name="text" id="how2use">계산을 수행하는 것과 같이 'INPUT' 부분에 하나의 식을 입력합니다.&#10;
+포맷은 'y=(x에 관한식)' 또는 'f(x)=(x에 관한식)' 으로 입력한 후 'GRAPH' 버튼 하위의 'ADD' 버튼을 클릭합니다.&#10;
+중첩이 가능하며 색으로 구분할 수 있고 상단에 추가했던 그래프 식이 표시됩니다.&#10;
+'CLEAR' 버튼을 클릭하면 초기화된 후 새롭게 그래프를 추가할 수 있습니다.
+                      </textarea>
+                    </div>
+                    <button class="op graph" onclick="graph_click(this.value);" value="add">ADD</button><br>
+                    <button class="op graph" onclick="graph_click(this.value);" value="clear">CLEAR</button>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc HISTORY" onclick="show_history()" value="HISTORY">HISTORY</button>
+                </td></tr>
+              <tr>
+                <td>
+                  <button class="calc operator" id="op1" onclick="select_operator(this.value);" value="op1">산술연산</button>
+                  <div class="additional" id="op1_atn">
+                    <button class="op" onclick="button_click(this.value);" value="+">+</button>
+                    <button class="op" onclick="button_click(this.value);" value="-">-</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="*">*</button>
+                    <button class="op" onclick="button_click(this.value);" value="/">/</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="%">%</button>
+                    <button class="op" onclick="button_click(this.value);" value="^">^</button>
+                  </div>
+                </td>
+
+                <td>
+                  <button class="calc operator" id="op2" onclick="select_operator(this.value);" value="op2">비교연산</button>
+                  <div class="additional" id="op2_atn">
+                    <button class="op" onclick="button_click(this.value);" value="=">=</button>
+                    <button class="op" onclick="button_click(this.value);" value="!">!</button><br>
+                    <button class="op" onclick="button_click(this.value);" value=">">></button>
+                    <button class="op" onclick="button_click(this.value);" value="<"><</button><br>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc operator" id="op3" onclick="select_operator(this.value);" value="op3">변수(함수)</button>
+                  <div class="additional" id="op3_atn">
+                    <button class="op" onclick="button_click(this.value);" value="x">x</button>
+                    <button class="op" onclick="button_click(this.value);" value="y">y</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="z">z</button>
+                    <button class="op" onclick="button_click(this.value);" value="f">f</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="g">g</button>
+                    <button class="op" onclick="button_click(this.value);" value="h">h</button>
+                    </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button class="calc operator" id="op4" onclick="select_operator(this.value);" value="op4">삼각함수</button>
+                  <div class="additional" id="op4_atn">
+                    <button class="op" onclick="button_click(this.value);" value="sin">sin</button>
+                    <button class="op" onclick="button_click(this.value);" value="cos">cos</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="tan">tan</button>
+                    <button class="op" onclick="button_click(this.value);" value="asin">asin</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="acos">acos</button>
+                    <button class="op" onclick="button_click(this.value);" value="atan">atan</button>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc operator" id="op5" onclick="select_operator(this.value);" value="op5">괄호</button>
+                  <div class="additional" id="op5_atn">
+                    <button class="op" onclick="button_click(this.value);" value="(">(</button>
+                    <button class="op" onclick="button_click(this.value);" value=")">)</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="[">[</button>
+                    <button class="op" onclick="button_click(this.value);" value="]">]</button><br>
+                    <button class="op" onclick="button_click(this.value);" value=";">;</button>
+                    <button class="op" onclick="button_click(this.value);" value=":">:</button>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc operator" id="op6" onclick="select_operator(this.value);" value="op6">상수</button>
+                  <div class="additional" id="op6_atn">
+                    <button class="op" onclick="button_click(this.value);" value="PI">PI</button>
+                    <button class="op" onclick="button_click(this.value);" value="E">E</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="deg">deg</button>
+                    <button class="op" onclick="button_click(this.value);" value="rad">rad</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="i">i</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button class="calc operator" id="op7" onclick="select_operator(this.value);" value="op7">함수</button>
+                  <div class="additional" id="op7_atn">
+                    <button class="op" onclick="button_click(this.value);" value="exp">exp</button>
+                    <button class="op" onclick="button_click(this.value);" value="log">log</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="sqrt">sqrt</button>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc operator" id="op8" onclick="select_operator(this.value);" value="op8">행렬</button>
+                  <div class="additional" id="op8_atn">
+                    <button class="op" onclick="button_click(this.value);" value="matrix">matrix</button>
+                    <button class="op" onclick="button_click(this.value);" value="det">det</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="inv">inv</button>
+                    <button class="op" onclick="button_click(this.value);" value="A">A</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="B">B</button>
+                    <button class="op" onclick="button_click(this.value);" value="C">C</button>
+                  </div>
+                </td>
+                <td>
+                  <button class="calc operator" id="op9" onclick="select_operator(this.value);" value="op9">벡터</button>
+                  <div class="additional" id="op9_atn">
+                    <button class="op" onclick="button_click(this.value);" value="dot">dot</button><br>
+                    <button class="op" onclick="button_click(this.value);" value="cross">cross</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><button class="calc RED" onclick="button_click(this.value);" value='CLEAR'>CLEAR</button></td>
+                <td><button class="calc RED" onclick="button_click(this.value);" value='backspace'>←</button></td>
+                <td><button class="calc RED" onclick="button_click(this.value);" value='EV'>EV</button></td>
+              </tr>
+              <tr>
+                <td colspan="3" id="bottom">2014726074_ChoiKyungjin.</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </center>
+    <script src="draw_graph.js" type='text/javascript'> </script>
+    <script src="stringToformula.js" type='text/javascript'> </script>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.8.21/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+
+  </body>
+</html>
